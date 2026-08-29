@@ -1,4 +1,6 @@
-// Lab Assignment 1 - Lecture 1
-// Solution will be implemented here
+#!/usr/bin/env node
 
-console.log("Welcome to Web Dev - III Assignment!");
+// Lab Assignment 1 - Smart Utility Toolkit
+// Main entry point - Runs the demonstration
+
+require("./app.js");

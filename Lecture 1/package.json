@@ -1,13 +1,24 @@
 {
   "name": "lecture-1",
   "version": "1.0.0",
-  "description": "",
+  "description": "Smart Utility Toolkit - Lab Assignment 1",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "app": "node app.js",
+    "server": "node server.js",
+    "calc": "node calculator.js",
+    "dice": "node -e \"const dice = require('./dice'); console.log('Rolling 1 dice:', dice.rollDice());\"",
+    "test": "echo \"Run: npm start to test all components\""
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "nodejs",
+    "modules",
+    "http-server",
+    "file-manager",
+    "calculator"
+  ],
+  "author": "Gourav Sharma",
   "license": "ISC",
   "type": "commonjs"
 }
