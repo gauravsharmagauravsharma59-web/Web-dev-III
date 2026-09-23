@@ -1,0 +1,22 @@
+{
+  "name": "student-management-rest-api",
+  "version": "1.0.0",
+  "description": "Student Management REST API for Web Dev III Assignment 2",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js",
+    "test": "node -e \"const app=require('./app'); console.log('App loaded successfully');\""
+  },
+  "keywords": [
+    "node",
+    "express",
+    "rest-api",
+    "students"
+  ],
+  "author": "Gaurav Sharma",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
