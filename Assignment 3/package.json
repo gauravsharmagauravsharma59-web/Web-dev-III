@@ -1,0 +1,23 @@
+{
+  "name": "inventory-data-management-system",
+  "version": "1.0.0",
+  "description": "Inventory Data Management System for Web Dev III Assignment 3",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js",
+    "test": "node -e \"const app = require('./app'); console.log('App loaded successfully');\""
+  },
+  "keywords": [
+    "node",
+    "express",
+    "inventory",
+    "crud",
+    "rest-api"
+  ],
+  "author": "Gaurav Sharma",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

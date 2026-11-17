@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inventory Dashboard</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+        color: #1f2937;
+      }
+      .container {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 20px;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        gap: 20px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 2.2rem;
+      }
+      .badge {
+        background: #2563eb;
+        color: white;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        font-weight: bold;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 20px;
+      }
+      .panel {
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+        padding: 20px;
+      }
+      form {
+        display: grid;
+        gap: 14px;
+      }
+      label {
+        display: grid;
+        gap: 6px;
+        font-weight: 600;
+        color: #374151;
+      }
+      input, button {
+        font: inherit;
+      }
+      input {
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        outline: none;
+      }
+      input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      }
+      button {
+        border: none;
+        border-radius: 10px;
+        padding: 11px 16px;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .primary {
+        background: #2563eb;
+        color: white;
+      }
+      .secondary {
+        background: #e2e8f0;
+        color: #1f2937;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .stat-box {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        border-radius: 12px;
+        padding: 18px;
+        text-align: center;
+      }
+      .stat-number {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #1d4ed8;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      th, td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+      }
+      th {
+        background: #f8fafc;
+      }
+      .low-stock {
+        color: #b91c1c;
+        font-weight: 700;
+      }
+      .status {
+        margin-top: 16px;
+        min-height: 24px;
+        font-weight: 600;
+      }
+      .success { color: #15803d; }
+      .error { color: #b91c1c; }
+      @media (max-width: 800px) {
+        .grid { grid-template-columns: 1fr; }
+        .stats { grid-template-columns: 1fr; }
+        .header { flex-direction: column; align-items: flex-start; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Inventory Dashboard</h1>
+        <span class="badge">Live Stock</span>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h2>Add New Item</h2>
+          <form id="itemForm">
+            <label>
+              Product Name
+              <input type="text" name="name" placeholder="e.g. Monitor" required />
+            </label>
+            <label>
+              Category
+              <input type="text" name="category" placeholder="e.g. Electronics" required />
+            </label>
+            <label>
+              Quantity
+              <input type="number" name="quantity" min="0" value="0" required />
+            </label>
+            <label>
+              Price
+              <input type="number" name="price" min="1" step="0.01" value="0" required />
+            </label>
+            <label>
+              Supplier
+              <input type="text" name="supplier" placeholder="Supplier name" required />
+            </label>
+            <button class="primary" type="submit">Add Item</button>
+          </form>
+          <div id="message" class="status"></div>
+        </div>
+
+        <div class="panel">
+          <div class="stats">
+            <div class="stat-box">
+              <div>Total Items</div>
+              <div id="totalItems" class="stat-number">0</div>
+            </div>
+            <div class="stat-box">
+              <div>Low Stock</div>
+              <div id="lowStockCount" class="stat-number">0</div>
+            </div>
+            <div class="stat-box">
+              <div>Total Value</div>
+              <div id="totalValue" class="stat-number">₹0</div>
+            </div>
+          </div>
+
+          <h2>Inventory List</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Supplier</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script src="/script.js"></script>
+  </body>
+</html>

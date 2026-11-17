@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Laptop",
+    "category": "Electronics",
+    "quantity": 15,
+    "price": 55000,
+    "supplier": "TechSource Ltd."
+  },
+  {
+    "id": 2,
+    "name": "Keyboard",
+    "category": "Accessories",
+    "quantity": 30,
+    "price": 1200,
+    "supplier": "KeyMart"
+  },
+  {
+    "id": 3,
+    "name": "Office Chair",
+    "category": "Furniture",
+    "quantity": 8,
+    "price": 4500,
+    "supplier": "ComfortWorks"
+  },
+  {
+    "id": 4,
+    "name": "Monitor",
+    "category": "Electronics",
+    "quantity": 11,
+    "price": 12000,
+    "supplier": "Display Hub"
+  },
+  {
+    "id": 5,
+    "name": "m m m",
+    "category": "m m m",
+    "quantity": 0,
+    "price": 8,
+    "supplier": "bhbjn"
+  },
+  {
+    "id": 6,
+    "name": "chain",
+    "category": "cosmetic",
+    "quantity": 1,
+    "price": 1500,
+    "supplier": "Gaurav Sharma"
+  }
+]
