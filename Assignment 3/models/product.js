@@ -31,12 +31,14 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Quantity is required'],
       min: [0, 'Quantity cannot be negative'],
+      validate: [Number.isInteger, 'Quantity must be a whole number'],
       default: 0
     },
     reorderLevel: {
       type: Number,
       required: [true, 'Reorder level is required'],
       min: [0, 'Reorder level cannot be negative'],
+      validate: [Number.isInteger, 'Reorder level must be a whole number'],
       default: 0
     },
     supplier: {

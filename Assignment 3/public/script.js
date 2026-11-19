@@ -15,6 +15,7 @@ async function loadInventory() {
       return `
         <tr>
           <td>${item.id}</td>
+          <td>${item.sku}</td>
           <td>${item.name}</td>
           <td>${item.category}</td>
           <td class="${stockClass}">${item.quantity}</td>
@@ -28,7 +29,7 @@ async function loadInventory() {
     lowStockCount.textContent = items.filter(item => item.quantity < 10).length;
     totalValue.textContent = `₹${items.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0).toLocaleString('en-IN')}`;
   } catch (error) {
-    inventoryTable.innerHTML = '<tr><td colspan="6">Unable to load inventory data.</td></tr>';
+    inventoryTable.innerHTML = '<tr><td colspan="7">Unable to load inventory data.</td></tr>';
   }
 }
 
@@ -36,6 +37,7 @@ itemForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   const formData = new FormData(itemForm);
   const payload = {
+    sku: formData.get('sku'),
     name: formData.get('name'),
     category: formData.get('category'),
     quantity: Number(formData.get('quantity')),

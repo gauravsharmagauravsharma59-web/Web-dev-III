@@ -1,180 +1,93 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
+const Product = require('../models/product');
 
 const router = express.Router();
-const dataFilePath = path.join(__dirname, '..', 'data', 'inventory.json');
 
-function readInventory() {
-  const raw = fs.readFileSync(dataFilePath, 'utf8');
-  return JSON.parse(raw);
+const asyncHandler = (handler) => (req, res, next) => {
+  Promise.resolve(handler(req, res, next)).catch(next);
+};
+
+function pickProductFields(data) {
+  const fields = ['sku', 'name', 'category', 'price', 'quantity', 'reorderLevel', 'supplier'];
+  return fields.reduce((product, field) => {
+    if (data[field] !== undefined) {
+      product[field] = data[field];
+    }
+    return product;
+  }, {});
 }
 
-function writeInventory(items) {
-  fs.writeFileSync(dataFilePath, JSON.stringify(items, null, 2));
-}
-
-function validateItem(data, isUpdate = false) {
-  const item = data || {};
-
-  if (!isUpdate) {
-    if (!item.name || !item.category || !item.supplier) {
-      return 'Name, category and supplier are required';
-    }
-  }
-
-  if (item.name !== undefined && (!String(item.name).trim())) {
-    return 'Name cannot be empty';
-  }
-
-  if (item.category !== undefined && (!String(item.category).trim())) {
-    return 'Category cannot be empty';
-  }
-
-  if (item.supplier !== undefined && (!String(item.supplier).trim())) {
-    return 'Supplier cannot be empty';
-  }
-
-  if (item.quantity !== undefined) {
-    const quantity = Number(item.quantity);
-    if (Number.isNaN(quantity) || !Number.isInteger(quantity) || quantity < 0) {
-      return 'Quantity must be a non-negative integer';
-    }
-  }
-
-  if (item.price !== undefined) {
-    const price = Number(item.price);
-    if (Number.isNaN(price) || price <= 0) {
-      return 'Price must be a positive number';
-    }
-  }
-
-  return null;
-}
-
-router.get('/', (req, res) => {
-  const inventory = readInventory();
+router.get('/', asyncHandler(async (req, res) => {
+  const inventory = await Product.find();
   res.status(200).json({
     message: 'Inventory Data Management System API is running',
     inventory
   });
-});
+}));
 
-router.get('/items', (req, res) => {
-  const inventory = readInventory();
+router.get('/items', asyncHandler(async (req, res) => {
+  const inventory = await Product.find();
   res.status(200).json(inventory);
-});
+}));
 
-router.get('/items/:id', (req, res) => {
-  const inventory = readInventory();
-  const itemId = Number(req.params.id);
-  const item = inventory.find((entry) => entry.id === itemId);
-
+router.get('/items/:id', asyncHandler(async (req, res) => {
+  const item = await Product.findById(req.params.id);
   if (!item) {
     return res.status(404).json({ message: 'Item not found' });
   }
-
   return res.status(200).json(item);
-});
+}));
 
-router.get('/low-stock', (req, res) => {
-  const inventory = readInventory();
-  const threshold = Number(req.query.threshold) || 10;
-  const lowStockItems = inventory.filter((item) => item.quantity < threshold);
-
-  res.status(200).json({ threshold, lowStockItems });
-});
-
-router.post('/items', (req, res) => {
-  const inventory = readInventory();
-  const validationError = validateItem(req.body);
-
-  if (validationError) {
-    return res.status(400).json({ message: validationError });
+router.get('/low-stock', asyncHandler(async (req, res) => {
+  const threshold = req.query.threshold === undefined ? 10 : Number(req.query.threshold);
+  if (!Number.isFinite(threshold) || threshold < 0) {
+    return res.status(400).json({ message: 'Threshold must be a non-negative number' });
   }
+  const lowStockItems = await Product.find({ quantity: { $lt: threshold } });
+  res.status(200).json({ threshold, lowStockItems });
+}));
 
-  const newItem = {
-    id: inventory.length ? inventory[inventory.length - 1].id + 1 : 1,
-    name: String(req.body.name).trim(),
-    category: String(req.body.category).trim(),
-    quantity: Number(req.body.quantity ?? 0),
-    price: Number(req.body.price),
-    supplier: String(req.body.supplier).trim()
-  };
-
-  inventory.push(newItem);
-  writeInventory(inventory);
-
+router.post('/items', asyncHandler(async (req, res) => {
+  const newItem = await Product.create(pickProductFields(req.body || {}));
   return res.status(201).json({ message: 'Item added successfully', item: newItem });
-});
+}));
 
-router.put('/items/:id', (req, res) => {
-  const inventory = readInventory();
-  const itemId = Number(req.params.id);
-  const itemIndex = inventory.findIndex((item) => item.id === itemId);
-
-  if (itemIndex === -1) {
+router.put('/items/:id', asyncHandler(async (req, res) => {
+  const item = await Product.findByIdAndUpdate(req.params.id, pickProductFields(req.body || {}), {
+    new: true,
+    runValidators: true
+  });
+  if (!item) {
     return res.status(404).json({ message: 'Item not found' });
   }
+  return res.status(200).json({ message: 'Item updated successfully', item });
+}));
 
-  const validationError = validateItem(req.body, true);
-  if (validationError) {
-    return res.status(400).json({ message: validationError });
-  }
-
-  const updatedItem = {
-    ...inventory[itemIndex],
-    name: req.body.name !== undefined ? String(req.body.name).trim() : inventory[itemIndex].name,
-    category: req.body.category !== undefined ? String(req.body.category).trim() : inventory[itemIndex].category,
-    quantity: req.body.quantity !== undefined ? Number(req.body.quantity) : inventory[itemIndex].quantity,
-    price: req.body.price !== undefined ? Number(req.body.price) : inventory[itemIndex].price,
-    supplier: req.body.supplier !== undefined ? String(req.body.supplier).trim() : inventory[itemIndex].supplier
-  };
-
-  inventory[itemIndex] = updatedItem;
-  writeInventory(inventory);
-
-  return res.status(200).json({ message: 'Item updated successfully', item: updatedItem });
-});
-
-router.patch('/items/:id/stock', (req, res) => {
-  const inventory = readInventory();
-  const itemId = Number(req.params.id);
-  const item = inventory.find((entry) => entry.id === itemId);
-
+router.patch('/items/:id/stock', asyncHandler(async (req, res) => {
+  const item = await Product.findById(req.params.id);
   if (!item) {
     return res.status(404).json({ message: 'Item not found' });
   }
 
   const quantityDelta = Number(req.body.quantity);
-
   if (Number.isNaN(quantityDelta) || !Number.isFinite(quantityDelta)) {
     return res.status(400).json({ message: 'A valid quantity value is required' });
   }
 
-  const updatedQuantity = Math.max(0, item.quantity + quantityDelta);
-  item.quantity = updatedQuantity;
-  writeInventory(inventory);
-
+  item.quantity = Math.max(0, item.quantity + quantityDelta);
+  await item.save();
   return res.status(200).json({
     message: 'Stock updated successfully',
     item
   });
-});
+}));
 
-router.delete('/items/:id', (req, res) => {
-  const inventory = readInventory();
-  const itemId = Number(req.params.id);
-  const itemIndex = inventory.findIndex((item) => item.id === itemId);
-
-  if (itemIndex === -1) {
+router.delete('/items/:id', asyncHandler(async (req, res) => {
+  const item = await Product.findByIdAndDelete(req.params.id);
+  if (!item) {
     return res.status(404).json({ message: 'Item not found' });
   }
-
-  const [deletedItem] = inventory.splice(itemIndex, 1);
-  writeInventory(inventory);
-
-  return res.status(200).json({ message: 'Item deleted successfully', item: deletedItem });
-});
+  return res.status(200).json({ message: 'Item deleted successfully', item });
+}));
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const path = require('path');
 const logger = require('./middleware/logger');
 const inventoryRoutes = require('./routes/inventoryRoutes');
@@ -22,13 +23,27 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ message: 'Internal Server Error' });
+  if (err.name === 'ValidationError' || err.name === 'CastError') {
+    return res.status(400).json({ message: err.message });
+  }
+  if (err.code === 11000) {
+    return res.status(409).json({ message: 'SKU already exists' });
+  }
+  return res.status(500).json({ message: 'Internal Server Error' });
 });
 
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  });
+  const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/inventory-management';
+  mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 5000 })
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+      });
+    })
+    .catch((error) => {
+      console.error('Unable to connect to MongoDB:', error.message);
+      process.exitCode = 1;
+    });
 }
 
 module.exports = app;
